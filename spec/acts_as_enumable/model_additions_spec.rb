@@ -78,6 +78,20 @@ describe ActsAsEnumable::ModelAdditions do
 
   end
 
+  it "accepts assigns correctly when given is role index" do
+            user = User.new
+    user.role.should be_nil
+    user.status.should be_nil
+
+     [:admin, :staff, :helper, :member].each_with_index do |role,i|
+
+      user.role = i
+      user.send(:read_attribute, :role).should == i
+      user.role.should == role
+    end
+
+  end
+
   it "handles incorrect enum values" do
     user = User.new
     user.role = "not existing role"

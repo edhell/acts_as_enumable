@@ -33,8 +33,12 @@ module ActsAsEnumable
       end
 
       define_method "#{attribute}=" do |symbol|
-        symbol = symbol.to_sym unless symbol.nil?
-        value = enum_values.index(symbol)
+        if symbol.class == Fixnum
+          value = symbol
+        else
+          symbol = symbol.to_sym unless symbol.nil?
+          value = enum_values.index(symbol)
+        end
         write_attribute(attribute, value)
       end
 
