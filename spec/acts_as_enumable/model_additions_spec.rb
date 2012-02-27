@@ -63,6 +63,20 @@ describe ActsAsEnumable::ModelAdditions do
     user.send(:read_attribute, :status).should == 1
     user.status.should == :inactive
   end
+  
+  it "accepts assigns correctly when given role is string" do
+        user = User.new
+    user.role.should be_nil
+    user.status.should be_nil
+
+     [:admin, :staff, :helper, :member].each_with_index do |role,i|
+
+      user.role = role.to_s
+      user.send(:read_attribute, :role).should == i
+      user.role.should == role
+    end
+
+  end
 
   it "handles incorrect enum values" do
     user = User.new
