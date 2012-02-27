@@ -33,6 +33,7 @@ module ActsAsEnumable
       end
 
       define_method "#{attribute}=" do |symbol|
+        symbol = symbol.to_sym unless symbol.nil?
         value = enum_values.index(symbol)
         write_attribute(attribute, value)
       end
