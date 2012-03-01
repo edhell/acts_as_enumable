@@ -35,6 +35,7 @@ module ActsAsEnumable
       define_method "#{attribute}=" do |symbol|
         if symbol.class == Fixnum
           value = symbol
+          value = nil if value >= enum_values.length
         else
           symbol = symbol.to_sym unless symbol.nil?
           value = enum_values.index(symbol)

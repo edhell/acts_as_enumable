@@ -5,98 +5,125 @@ class User < SuperModel::Base
   def role
     read_attribute(:role)
   end
+
   def role=(val)
     write_attribute(:role, val)
   end
-  
+
   extend ActsAsEnumable::ModelAdditions
   acts_as_enumable :role, %w(admin staff helper member)
   acts_as_enumable :status, %w(active inactive)
 end
 
-describe ActsAsEnumable::ModelAdditions do
-  it "creates a constant given the attribute name and values" do
-    User.roles.should == [:admin, :staff, :helper, :member]
-    User.statuses.should == [:active, :inactive]
+  describe User do
+    context "class methods" do
+      context "returns array of enum names" do
+        subject{ described_class }
+
+        its(:roles){ should eq [:admin, :staff, :helper, :member] }
+        its(:statuses){ should eq [:active, :inactive] }
+      end
+
+      context "returns correct index for given enum name" do
+        it "role" do
+          [:admin, :staff, :helper, :member].each_with_index do |role,i|
+             described_class.role(role).should eq i 
+          end
+        end
+
+        it "status" do
+          [:active, :inactive].each_with_index do |status,i|
+            described_class.status(status).should eq i
+          end
+        end
+      end
+
+    context "returns hash of enum names for select_options in given I18 namespace" do
+      it "roles_for_select" do
+        described_class.roles_for_select("test.namespace").should eq(
+            [{
+              key: :admin, value: I18n.t("test.namespace.admin")
+            }, {
+              key: :staff, value: I18n.t("test.namespace.staff")
+            }, {
+              key: :helper, value: I18n.t("test.namespace.helper")
+            }, {
+              key: :member, value: I18n.t("test.namespace.member")
+            }]
+            )
+      end
+      it "statuses_for_select" do
+        described_class.statuses_for_select("test.namespace").should eq(
+            [{
+              key: :active, value: I18n.t("test.namespace.active")
+            }, {
+              key: :inactive, value: I18n.t("test.namespace.inactive")
+            }]
+            )
+      end
+    end
+
+    end
   end
 
-  it "returns index of given role" do
-      [:admin, :staff, :helper, :member].each_with_index do |role,i|
-        User.role(role).should == i
+
+
+describe User do
+    let(:instance){
+        described_class.new
+      }
+
+  context "assigns correct value" do
+    subject{ instance }
+    its(:role){ should be_nil }
+    its(:status){ should be_nil }
+
+      it "role=" do
+        [:admin, :staff, :helper, :member].each_with_index do |role,i|
+          instance.role = role
+          instance.send(:read_attribute, :role).should eq i
+          instance.role.should eq role
+        end
+      end
+      it "status=" do
+        [:active, :inactive].each_with_index do |status,i|
+          instance.status = status
+          instance.send(:read_attribute, :status).should eq i
+          instance.status.should eq status
+        end
       end
   end
-
-
-  it "returns an array to be used for select" do
-    User.roles_for_select("test.namespace").should == [{
-      key: :admin, value: I18n.t("test.namespace.admin")
-    }, {
-      key: :staff, value: I18n.t("test.namespace.staff")
-    }, {
-      key: :helper, value: I18n.t("test.namespace.helper")
-    }, {
-      key: :member, value: I18n.t("test.namespace.member")
-    }]
-
-    User.statuses_for_select("test.namespace").should == [{
-      key: :active, value: I18n.t("test.namespace.active")
-    }, {
-      key: :inactive, value: I18n.t("test.namespace.inactive")
-    }]
-  end
-
-
-  it "assigns correct value" do
-    user = User.new
-    user.role.should be_nil
-    user.status.should be_nil
-
-     [:admin, :staff, :helper, :member].each_with_index do |role,i|
-
-      user.role = role
-      user.send(:read_attribute, :role).should == i
-      user.role.should == role
-    
-    end
-
-    user.status = :inactive
-    user.send(:read_attribute, :status).should == 1
-    user.status.should == :inactive
-  end
   
-  it "accepts assigns correctly when given role is string" do
-        user = User.new
-    user.role.should be_nil
-    user.status.should be_nil
-
-     [:admin, :staff, :helper, :member].each_with_index do |role,i|
-
-      user.role = role.to_s
-      user.send(:read_attribute, :role).should == i
-      user.role.should == role
-    end
-
-  end
 
   it "accepts assigns correctly when given is role index" do
-            user = User.new
-    user.role.should be_nil
-    user.status.should be_nil
+    instance.role.should be_nil
+    instance.status.should be_nil
 
      [:admin, :staff, :helper, :member].each_with_index do |role,i|
 
-      user.role = i
-      user.send(:read_attribute, :role).should == i
-      user.role.should == role
+      instance.role = i
+      instance.send(:read_attribute, :role).should == i
+      instance.role.should == role
     end
+
+  end
+
+  it "sets enum to nil when given index is out of range" do
+    instance.role.should be_nil
+    instance.status.should be_nil
+    
+    size = described_class.roles.size
+
+    instance.role = size
+    instance.send(:read_attribute, :role).should be_nil
+    instance.role.should be_nil
 
   end
 
   it "handles incorrect enum values" do
-    user = User.new
-    user.role = "not existing role"
-    user.role.should be_nil
-    user.send(:read_attribute, :role).should be_nil
+    instance.role = "not existing role"
+    instance.role.should be_nil
+    instance.send(:read_attribute, :role).should be_nil
   end
 
 end
