@@ -37,6 +37,24 @@ end
           end
         end
       end
+    
+    context "returns nil for incorrect argument" do
+      it "role" do
+        described_class.role(nil).should be_nil
+        described_class.role(12312312).should be_nil
+        described_class.role(:i_cant_read).should be_nil
+        described_class.role("cats? I'm a kitty cat").should be_nil
+        
+      end
+
+      it "status" do
+        described_class.status(nil).should be_nil
+        described_class.status(12312312).should be_nil
+        described_class.status(:i_cant_read).should be_nil
+        described_class.status("cats? I'm a kitty cat").should be_nil
+
+      end
+    end
 
     context "returns hash of enum names for select_options in given I18 namespace" do
       it "roles_for_select" do

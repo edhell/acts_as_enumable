@@ -22,6 +22,7 @@ module ActsAsEnumable
 
       class_eval %Q{
         def self.#{attribute} symbol
+          return nil if symbol.nil? or symbol.class == Fixnum
           #{enum_values}.index(symbol.to_sym)
         end
        }
